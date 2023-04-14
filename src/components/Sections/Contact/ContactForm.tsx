@@ -1,4 +1,4 @@
-import {FC, memo, useCallback, useMemo, useState} from 'react';
+import { FC, memo, useCallback, useMemo, useState } from 'react';
 
 interface FormData {
   name: string;
@@ -18,13 +18,21 @@ const ContactForm: FC = memo(() => {
 
   const [data, setData] = useState<FormData>(defaultData);
 
+  //   Setting button text on form submission
+  const [buttonText, setButtonText] = useState("Submit");
+
+  // Setting success or failure messages states
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showFailureMessage, setShowFailureMessage] = useState(false);
+
+
   const onChange = useCallback(
     <T extends HTMLInputElement | HTMLTextAreaElement>(event: React.ChangeEvent<T>): void => {
-      const {name, value} = event.target;
+      const { name, value } = event.target;
 
-      const fieldData: Partial<FormData> = {[name]: value};
+      const fieldData: Partial<FormData> = { [name]: value };
 
-      setData({...data, ...fieldData});
+      setData({ ...data, ...fieldData });
     },
     [data],
   );
@@ -32,10 +40,33 @@ const ContactForm: FC = memo(() => {
   const handleSendMessage = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      /**
-       * This is a good starting point to wire up your form submission logic
-       * */
-      console.log('Data to send: ', data);
+      // console.log('Data to send: ', data);
+      setButtonText("Submitting...");
+
+      const res = await fetch("/api/sendgrid", {
+        body: JSON.stringify({
+          email: data.email,
+          fullname: data.name,
+          subject: data.name + ' has sent an email from your webpage!',
+          message: data.message,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
+
+      const { error } = await res.json();
+      if (error) {
+        console.log(error);
+        setShowSuccessMessage(false);
+        setShowFailureMessage(true);
+        setButtonText("Submit");
+        return;
+      }
+      setShowSuccessMessage(true);
+      setShowFailureMessage(false);
+      setButtonText("Submit");
     },
     [data],
   );
@@ -68,8 +99,22 @@ const ContactForm: FC = memo(() => {
         aria-label="Submit contact form"
         className="w-max rounded-full border-2 border-orange-600 bg-stone-900 px-4 py-2 text-sm font-medium text-white shadow-md outline-none hover:bg-stone-800 focus:ring-2 focus:ring-orange-600 focus:ring-offset-2 focus:ring-offset-stone-800"
         type="submit">
-        Send Message
+        {buttonText}
       </button>
+
+      <div className="text-left">
+        {showSuccessMessage && (
+          <p className="text-green-500 font-semibold text-sm my-2">
+            Thankyou! Your Message has been delivered.
+          </p>
+        )}
+        {showFailureMessage && (
+          <p className="text-red-500">
+            Oops! Something went wrong, please try again.
+          </p>
+        )}
+      </div>
+
     </form>
   );
 });
