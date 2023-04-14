@@ -1,7 +1,7 @@
-import {ChevronUpIcon} from '@heroicons/react/outline';
-import {FC, memo} from 'react';
+import { ChevronUpIcon } from '@heroicons/react/outline';
+import { FC, memo } from 'react';
 
-import {SectionId} from '../../data/data';
+import { SectionId } from '../../data/data';
 import Socials from '../Socials';
 
 const Footer: FC = memo(() => (
@@ -17,7 +17,7 @@ const Footer: FC = memo(() => (
       <div className="flex gap-x-4 text-neutral-500">
         <Socials />
       </div>
-      <span className="text-sm text-neutral-700">© Copyright 2022 Tim Baker</span>
+      <span className="text-sm text-neutral-700">© Copyright 2023</span>
     </div>
   </div>
 ));
